@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="static/style.css" />
+    <title>Express Server 2023</title>
+  </head>
+  <body>
+    <h1>Tres en Línea</h1>
+    <div id="board" class="board"></div>
+    <br>
+    <div class="room-selection">
+      <input id="name-room" type="text">
+      &nbsp;
+      <input id="select-room" type="button" value="Select Room">
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      socket.emit("get-status");
+      socket.on("set-status", (data) => {
+        let board = document.getElementById("board");
+        board.innerHTML = null;
+        for (let index = 0; index < data.length; index++) {
+          const element = document.createElement("div");
+          element.id = `item-square-${index}`;
+          element.className = "square";
+          element.innerHTML = data[index];
+          element.addEventListener("click", click, false);
+          board.appendChild(element);
+        }
+      });
+      function click(event) {
+        const position = event.target.id.replace("item-square-", "");
+        socket.emit("set-move", { position });
+      }
+      let select_room = document.getElementById("select-room");
+      let name_room = document.getElementById("name-room");
+      select_room.addEventListener("click", () => {
+        socket.emit("join-room", name_room.value);
+      });
+    </script>
+  </body>
+</html>
